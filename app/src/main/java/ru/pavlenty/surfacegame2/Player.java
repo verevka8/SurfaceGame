@@ -16,7 +16,7 @@ public class Player {
     private int minY;
 
     private final int MIN_SPEED = 1;
-    private final int MAX_SPEED = 20;
+    private final int MAX_SPEED = 50;
 
     private Rect detectCollision;
 
@@ -56,7 +56,7 @@ public class Player {
             speed = MIN_SPEED;
         }
 
-        y -= speed + GRAVITY;
+        y = y - (speed + GRAVITY);
 
         if (y < minY) {
             y = minY;
@@ -72,7 +72,6 @@ public class Player {
         detectCollision.bottom = y + bitmap.getHeight();
 
     }
-
 
     public Rect getDetectCollision() {
         return detectCollision;

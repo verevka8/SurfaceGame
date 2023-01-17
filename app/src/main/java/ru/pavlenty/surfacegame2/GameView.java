@@ -3,6 +3,7 @@ package ru.pavlenty.surfacegame2;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -23,11 +24,12 @@ public class GameView extends SurfaceView implements Runnable {
     private Paint paint;
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
-
+    private Enemy enemy;
+    private Boom boom;
     private ArrayList<Star> stars = new ArrayList<Star>();
-
     int screenX;
     int countMisses;
+    private Boolean isCollisionEnemy = false;
 
     boolean flag ;
 
@@ -52,7 +54,7 @@ public class GameView extends SurfaceView implements Runnable {
     public GameView(Context context, int screenX, int screenY) {
         super(context);
         player = new Player(context, screenX, screenY);
-
+        boom = new Boom(context);
         surfaceHolder = getHolder();
         paint = new Paint();
 
@@ -61,7 +63,8 @@ public class GameView extends SurfaceView implements Runnable {
             Star s = new Star(screenX, screenY);
             stars.add(s);
         }
-
+        Enemy e = new Enemy(context,screenX,screenY);
+        enemy = e;
         this.screenX = screenX;
         countMisses = 0;
         isGameOver = false;
@@ -128,6 +131,15 @@ public class GameView extends SurfaceView implements Runnable {
                 paint.setStrokeWidth(s.getStarWidth());
                 canvas.drawPoint(s.getX(), s.getY(), paint);
             }
+            canvas.drawBitmap(enemy.getBitmap(),
+                    enemy.getX(),
+                    enemy.getY(),
+                    paint);
+            canvas.drawBitmap(
+                    boom.getBitmap(),
+                    boom.getX(),
+                    boom.getY(),
+                    paint);
 
 
             paint.setTextSize(30);
@@ -146,6 +158,7 @@ public class GameView extends SurfaceView implements Runnable {
 
                 int yPos=(int) ((canvas.getHeight() / 2) - ((paint.descent() + paint.ascent()) / 2));
                 canvas.drawText("Конец игры",canvas.getWidth()/2,yPos,paint);
+
             }
 
             surfaceHolder.unlockCanvasAndPost(canvas);
@@ -167,6 +180,14 @@ public class GameView extends SurfaceView implements Runnable {
         for (Star s : stars) {
             s.update(player.getSpeed());
         }
+        enemy.update(player.getSpeed());
+        isGameOver = Rect.intersects(enemy.getDetectCollision(),player.getDetectCollision());
+        if (isGameOver) {
+            boom.setX(enemy.getX());
+            boom.setY(enemy.getY());
+            playing = false;
+        }
+
     }
 
     private void control() {
