@@ -17,30 +17,28 @@ import java.util.ArrayList;
 
 public class GameView extends SurfaceView implements Runnable {
 
-    volatile boolean playing;
-    private Thread gameThread = null;
-    private Player player;
 
+    private Thread gameThread = null;
+
+    private Player player;
     private Paint paint;
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
     private Enemy enemy;
     private Boom boom;
-    private ArrayList<Star> stars = new ArrayList<Star>();
+    private Friend friend;
+
     int screenX;
     int countMisses;
+    int score;
     private Boolean isCollisionEnemy = false;
 
-    boolean flag ;
-
-
+    volatile boolean playing;
     private boolean isGameOver;
 
-
-    int score;
-
-
+    private ArrayList<Star> stars = new ArrayList<Star>();
     int highScore[] = new int[4];
+
 
 
     SharedPreferences sharedPreferences;
@@ -54,7 +52,6 @@ public class GameView extends SurfaceView implements Runnable {
     public GameView(Context context, int screenX, int screenY) {
         super(context);
         player = new Player(context, screenX, screenY);
-        boom = new Boom(context);
         surfaceHolder = getHolder();
         paint = new Paint();
 
@@ -65,6 +62,9 @@ public class GameView extends SurfaceView implements Runnable {
         }
         Enemy e = new Enemy(context,screenX,screenY);
         enemy = e;
+        Friend f = new Friend(context,screenX,screenY);
+        friend = f;
+        boom = new Boom(context);
         this.screenX = screenX;
         countMisses = 0;
         isGameOver = false;
@@ -140,6 +140,11 @@ public class GameView extends SurfaceView implements Runnable {
                     boom.getX(),
                     boom.getY(),
                     paint);
+            canvas.drawBitmap(
+                    friend.getBitmap(),
+                    friend.getX(),
+                    friend.getY(),
+                    paint);
 
 
             paint.setTextSize(30);
@@ -181,6 +186,7 @@ public class GameView extends SurfaceView implements Runnable {
             s.update(player.getSpeed());
         }
         enemy.update(player.getSpeed());
+        friend.update(player.getSpeed());
         isGameOver = Rect.intersects(enemy.getDetectCollision(),player.getDetectCollision());
         if (isGameOver) {
             boom.setX(enemy.getX());
