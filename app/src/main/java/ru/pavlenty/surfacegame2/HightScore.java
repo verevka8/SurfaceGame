@@ -2,6 +2,7 @@ package ru.pavlenty.surfacegame2;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.widget.TextView;
@@ -14,6 +15,7 @@ public class HightScore extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hight_score);
 

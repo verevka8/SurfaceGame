@@ -7,6 +7,7 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Friend {
     private Bitmap bitmap;
@@ -21,7 +22,7 @@ public class Friend {
 
     private long present_time;
     private long previous_time = 0;
-    private long delay_time;
+    private long delay_time = 1000;
 
     private Rect detectCollision;
 
@@ -38,18 +39,22 @@ public class Friend {
         detectCollision =  new Rect(x, y, bitmap.getWidth(), bitmap.getHeight());
     }
 
-    public void update(int player_speed) {
+    public void update(int playerSpeed) {
 
         x -= (speed);
+        x -= playerSpeed;
+
 
         if (x < (-1) * bitmap.getWidth()) {
             Random generator = new Random();
             present_time = System.currentTimeMillis();
-            delay_time = generator.nextInt(200) * 100 + 200;
+
+            //Log.d("qqqq", Long.toString(delay_time));
             if (present_time - previous_time >= delay_time){
+                delay_time = ThreadLocalRandom.current().nextInt(4000,7000);
                 previous_time = present_time;
                 speed = 15 + generator.nextInt(15);
-                y = generator.nextInt(maxY);
+                y = generator.nextInt(maxY-bitmap.getHeight());
                 x = maxX;
             }
             else{
@@ -85,5 +90,11 @@ public class Friend {
 
     public int getSpeed() {
         return speed;
+    }
+
+    public void restart() {
+        x = maxX;
+        y = maxY;
+        speed = 20;
     }
 }

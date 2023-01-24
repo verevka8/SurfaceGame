@@ -11,7 +11,7 @@ public class Player {
     private int y;
     private int speed = 0;
     private boolean boosting;
-    private final int GRAVITY = -10;
+    private int GRAVITY = -15;
     private int maxY;
     private int minY;
 
@@ -43,9 +43,11 @@ public class Player {
 
     public void update() {
         if (boosting) {
-            speed += 2;
+            speed += 3;
+            GRAVITY = -10;
         } else {
             speed -= 5;
+            GRAVITY = -15;
         }
 
         if (speed > MAX_SPEED) {

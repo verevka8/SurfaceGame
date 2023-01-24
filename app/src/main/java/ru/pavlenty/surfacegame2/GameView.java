@@ -9,16 +9,24 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.MediaPlayer;
+import android.preference.Preference;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class GameView extends SurfaceView implements Runnable {
 
 
     private Thread gameThread = null;
+    private Timer timer;
 
     private Player player;
     private Paint paint;
@@ -27,14 +35,18 @@ public class GameView extends SurfaceView implements Runnable {
     private Enemy enemy;
     private Boom boom;
     private Friend friend;
+    private Bullet bullet;
 
     int screenX;
     int countMisses;
     int score;
+    private int count_hp;
     private Boolean isCollisionEnemy = false;
 
     volatile boolean playing;
     private boolean isGameOver;
+    private boolean isHpLost;
+    private boolean isHpAdd;
 
     private ArrayList<Star> stars = new ArrayList<Star>();
     int highScore[] = new int[4];
@@ -54,6 +66,8 @@ public class GameView extends SurfaceView implements Runnable {
         player = new Player(context, screenX, screenY);
         surfaceHolder = getHolder();
         paint = new Paint();
+        bullet = new Bullet(context,screenX,screenY);
+
 
         int starNums = 100;
         for (int i = 0; i < starNums; i++) {
@@ -68,6 +82,8 @@ public class GameView extends SurfaceView implements Runnable {
         this.screenX = screenX;
         countMisses = 0;
         isGameOver = false;
+        isHpLost = false;
+        count_hp = 3;
 
 
         score = 0;
@@ -98,6 +114,7 @@ public class GameView extends SurfaceView implements Runnable {
             case MotionEvent.ACTION_DOWN:
                 player.setBoosting();
                 break;
+
 
         }
 
@@ -147,8 +164,9 @@ public class GameView extends SurfaceView implements Runnable {
                     paint);
 
 
-            paint.setTextSize(30);
+            paint.setTextSize(50);
             canvas.drawText("Очки: "+score,100,50,paint);
+            canvas.drawText("Жизни: " + count_hp, 800, 50,paint);
 
             canvas.drawBitmap(
                     player.getBitmap(),
@@ -187,13 +205,30 @@ public class GameView extends SurfaceView implements Runnable {
         }
         enemy.update(player.getSpeed());
         friend.update(player.getSpeed());
-        isGameOver = Rect.intersects(enemy.getDetectCollision(),player.getDetectCollision());
-        if (isGameOver) {
+        isHpLost = Rect.intersects(enemy.getDetectCollision(),player.getDetectCollision());
+        if (isHpLost) {
+            timer = new Timer();
             boom.setX(enemy.getX());
             boom.setY(enemy.getY());
-            playing = false;
+            count_hp-=1;
+            Log.d("qqqq", Integer.toString(count_hp));
+            enemy.restart();
+            timer.schedule(new TimerTask() {
+                public void run() {
+                    timerTick();
+                }
+            }, 500);
+        }
+        isHpAdd = Rect.intersects(friend.getDetectCollision(),player.getDetectCollision());
+        if (isHpAdd){
+            count_hp+=1;
+            friend.restart();
         }
 
+        if (count_hp <= 0){
+            isGameOver = true;
+            playing = false;
+        }
     }
 
     private void control() {
@@ -217,6 +252,13 @@ public class GameView extends SurfaceView implements Runnable {
         gameThread = new Thread(this);
         gameThread.start();
     }
+
+    public void timerTick() {
+        boom.setX(2000);
+        boom.setY(2000);
+        timer = null;
+    }
+
 
 
 }
